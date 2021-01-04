@@ -1,4 +1,13 @@
 //########################################################################
+// General module imports
+//########################################################################
+require('dotenv').config()
+const cron = require('node-cron')
+const { NewPostCron } = require("./src/crons/RequestCrons");
+const { PostRatingService } = require('./src/services/PostRatingService');
+const { MailerService } = require('./src/services/MailerService')
+
+//########################################################################
 // Express configurations
 //########################################################################
 
@@ -7,17 +16,8 @@ const express = require('express')
 const cors = require('cors');
 
 const app = express();
-const port = 55555;
+const port = process.env.port || 55555;
 app.use(cors("*"))
-
-//########################################################################
-// General module imports
-//########################################################################
-require('dotenv').config()
-const cron = require('node-cron')
-const { NewPostCron } = require("./src/crons/RequestCrons");
-const { PostRatingService } = require('./src/services/PostRatingService');
-const { MailerService } = require('./src/services/MailerService')
 
 //########################################################################
 // Server variables
