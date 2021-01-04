@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const nodemailer = require('nodemailer')
 
 class MailerService {
@@ -17,10 +18,10 @@ class MailerService {
     SendEmail(mailOptions) {
         this.transporter.sendMail(mailOptions, function(err, info) {
             if(err) {
-                console.log("[EMAIL FAILURE]")
-                console.log(err)
+                console.log(chalk.red("[EMAIL FAILURE]"))
+                console.log(chalk.red(err))
             }else{
-                console.log(`[Email Sent] ${mailOptions.subject}`);
+                console.log(`${chalk.green("[Email Sent]")} ${mailOptions.subject}`);
             }
         })
     }

@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const axios = require('axios')
 const { RedditPost } = require('../models/RedditPost')
 
@@ -28,10 +29,10 @@ class RedditService {
                         )
                         postList.push(redditPost);
                     }catch(error) {
-                        console.log(`[Problematic Post] ${postContent.title}`);
+                        console.log(`${chalk.magenta("[Problematic Post]")} ${postContent.title}`);
                     }
                 })
-                console.log(`Query collected ${postList.length} posts`);
+                console.log(`${chalk.green("[Queried]")} ${postList.length} new posts`);
                 // Sort post list
                 postList = postList.sort((postA, postB) => {
                     return (postA.ups < postB.ups ? 1 : -1)

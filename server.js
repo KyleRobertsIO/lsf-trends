@@ -3,6 +3,7 @@
 //########################################################################
 require('dotenv').config()
 const cron = require('node-cron')
+const chalk = require('chalk')
 const { NewPostCron } = require("./src/crons/RequestCrons");
 const { PostRatingService } = require('./src/services/PostRatingService');
 const { MailerService } = require('./src/services/MailerService')
@@ -52,7 +53,7 @@ app.listen(port, () => {
 // Job to clear memory of post ids
 cron.schedule('* * */6 * *', () => {
     emailedPosts = new Set()
-    console.log("[Reset Emailed Post Cache]");
+    console.log(chalk.yellow("[Reset Emailed Post Cache]"));
 })
 
 // Start new post cron job
@@ -86,7 +87,7 @@ function runNewPostJob() {
         })
     })
     .catch((err) => {
-        console.log(err)
+        console.log(chalk.red(err))
         newPostArray = err
     })
 }
