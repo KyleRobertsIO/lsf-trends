@@ -1,15 +1,33 @@
+//########################################################################
+// Express configurations
+//########################################################################
+
+// import modules
 const express = require('express')
-const axios = require('axios');
-const app = express()
-const port = 55555
+const cors = require('cors');
 
+const app = express();
+const port = 55555;
+app.use(cors("*"))
+
+//########################################################################
+// General module imports
+//########################################################################
+require('dotenv').config()
+const cron = require('node-cron')
+const { NewPostCron } = require("./src/crons/RequestCrons");
+const { PostRatingService } = require('./src/services/PostRatingService');
+const { MailerService } = require('./src/services/MailerService')
+
+//########################################################################
+// Server variables
+//########################################################################
 let newPostArray = []
-queryNewPosts()
-.then((posts) => {
-    newPostArray = posts
-})
+let emailedPosts = new Set()
 
-
+//########################################################################
+// Endpoint configuration
+//########################################################################
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/static/index.html');
 })
@@ -18,36 +36,55 @@ app.get('/posts/new', (req, res) => {
     res.send(newPostArray);
 })
 
+//########################################################################
+// Startup of Express web server
+//########################################################################
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`Sub Reddit post monitor listening at http://localhost:${port}`)
+    runNewPostJob() // Initial run of new post job
+  })
+
+//########################################################################
+// Cron job section
+//########################################################################
+
+// Job to clear memory of post ids
+cron.schedule('* 0-23/5 * * *', () => {
+    emailedPosts = new Set()
 })
 
-function queryNewPosts(){
-    return new Promise((resolve, reject) => {
-        axios.get('https://www.reddit.com/r/LivestreamFail/new.json?sort=new')
-        .then((res) => {
-            const posts = res.data.data.children
-            let postList = [];
-            posts.forEach(post => {
-                const postContent = post.data
-                const postModel = {
-                    title: postContent.title,
-                    ups: postContent.ups,
-                    thumbnail_url: postContent.thumbnail_url,
-                    media_domain_url: postContent.media_domain_url
-                }
-                postList.push(postModel);
-            })
-            console.log(`Query collected ${postList.length} posts`);
-            // Sort post list
-            postList = postList.sort((postA, postB) => {
-                return (postA.ups < postB.ups ? 1 : -1)
-            })
+// Start new post cron job
+cron.schedule('0-59/5 * * * *', () => {
+    runNewPostJob()
+})
 
-            resolve(postList)
+
+// Modular function to run new post job
+function runNewPostJob() {
+    const postRatingService = new PostRatingService()
+    const mailerService = new MailerService("gmail")
+    NewPostCron()
+    .then((posts) => {
+        newPostArray = posts
+        // Handle post analysis
+        newPostArray.forEach((post) => {
+            if (emailedPosts.has(post.id)) { return }
+            if(postRatingService.AnalyzePostCandidate(post)) {
+                const emailOptions = {
+                    from: 'pogoochampooclips@gmail.com',
+                    to: 'kkroberts1635@gmail.com',
+                    subject: `${post.title}`,
+                    text: `${post.reddit_link}`
+                }
+                // Send email about post
+                mailerService.SendEmail(emailOptions)
+                // Write that post was emailed
+                emailedPosts.add(post.id)
+            }
         })
-        .catch((err) => {
-            reject(null)
-        })
+    })
+    .catch((err) => {
+        console.log(err)
+        newPostArray = err
     })
 }

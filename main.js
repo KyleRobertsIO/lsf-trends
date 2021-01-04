@@ -1,14 +1,12 @@
-const axios = require('axios');
+require('dotenv').config()
 
-main()
+const { MailerService } = require('./src/services/MailerService')
 
-function main(){
-    axios.get('https://www.reddit.com/r/LivestreamFail/new.json?sort=new')
-    .then((res) => {
-        const posts = res.data.data.children
-        posts.forEach(post => {
-            const postContent = post.data
-            console.log(`\n\n${postContent.title}\nUp Votes: ${postContent.ups}`);
-        })
-    })
+const emailService = new MailerService("gmail")
+const emailOptions = {
+    from: 'pogoochampooclips@gmail.com',
+    to: 'kkroberts1635@gmail.com',
+    subject: 'Clip name here',
+    text: 'Body of email.'
 }
+emailService.SendEmail(emailOptions);
