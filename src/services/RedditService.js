@@ -28,7 +28,7 @@ class RedditService {
                         )
                         postList.push(redditPost);
                     }catch(error) {
-                        console.log("Skipping problematic post");
+                        console.log(`[Problematic Post] ${postContent.title}`);
                     }
                 })
                 console.log(`Query collected ${postList.length} posts`);

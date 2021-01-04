@@ -49,8 +49,9 @@ app.listen(port, () => {
 //########################################################################
 
 // Job to clear memory of post ids
-cron.schedule('* * 1-31/2 * *', () => {
+cron.schedule('* 0-23/6 * * *', () => {
     emailedPosts = new Set()
+    console.log("[Reset Emailed Post Cache]");
 })
 
 // Start new post cron job
@@ -67,18 +68,20 @@ function runNewPostJob() {
         newPostArray = posts
         // Handle post analysis
         newPostArray.forEach((post) => {
-            if (emailedPosts.has(post.id)) { return }
-            if(postRatingService.AnalyzePostCandidate(post)) {
-                const emailOptions = {
-                    from: 'pogoochampooclips@gmail.com',
-                    to: 'kkroberts1635@gmail.com',
-                    subject: `${post.title}`,
-                    text: `${post.reddit_link}`
+            if (!emailedPosts.has(post.id)) {
+                if(postRatingService.AnalyzePostCandidate(post)) {
+                    const emailOptions = {
+                        from: 'pogoochampooclips@gmail.com',
+                        to: 'kkroberts1635@gmail.com',
+                        subject: `${post.title}`,
+                        text: `${post.reddit_link}`
+                    }
+                    // Send email about post
+                    mailerService.SendEmail(emailOptions)
+                    console.log(emailedPosts)
+                    // Write that post was emailed
+                    emailedPosts.add(post.id)
                 }
-                // Send email about post
-                mailerService.SendEmail(emailOptions)
-                // Write that post was emailed
-                emailedPosts.add(post.id)
             }
         })
     })
