@@ -74,7 +74,7 @@ function runNewPostJob() {
                 if(postRatingService.AnalyzePostCandidate(post)) {
                     const emailOptions = new MailOptions(
                         process.env.email_user,
-                        'kkroberts1635@gmail.com',
+                        process.env.target_email,
                         `${post.title}`,
                         `${post.reddit_link}`
                     )
