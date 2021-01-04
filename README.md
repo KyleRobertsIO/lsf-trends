@@ -1,5 +1,5 @@
 **Run Start Up Script on Windows**
-Place .bat file in this folder for it to run on startup of windows.
+Place .bat file in this folder for it to run on startup of windows. Accessed through Windows Key + R.
 ```sh
 shell:startup
 ```

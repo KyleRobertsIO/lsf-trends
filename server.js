@@ -49,7 +49,7 @@ app.listen(port, () => {
 //########################################################################
 
 // Job to clear memory of post ids
-cron.schedule('* 0-23/5 * * *', () => {
+cron.schedule('* * 1-31/2 * *', () => {
     emailedPosts = new Set()
 })
 
@@ -57,7 +57,6 @@ cron.schedule('* 0-23/5 * * *', () => {
 cron.schedule('0-59/5 * * * *', () => {
     runNewPostJob()
 })
-
 
 // Modular function to run new post job
 function runNewPostJob() {

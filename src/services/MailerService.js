@@ -20,7 +20,7 @@ class MailerService {
                 console.log("[EMAIL FAILURE]")
                 console.log(err)
             }else{
-                console.log("Email sent");
+                console.log(`Email sent - ${mailOptions.subject}`);
             }
         })
     }
