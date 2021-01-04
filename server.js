@@ -6,6 +6,7 @@ const cron = require('node-cron')
 const { NewPostCron } = require("./src/crons/RequestCrons");
 const { PostRatingService } = require('./src/services/PostRatingService');
 const { MailerService } = require('./src/services/MailerService')
+const { MailOptions } = require('./src/models/MailOptions')
 
 //########################################################################
 // Express configurations
@@ -49,13 +50,13 @@ app.listen(port, () => {
 //########################################################################
 
 // Job to clear memory of post ids
-cron.schedule('* 0-23/6 * * *', () => {
+cron.schedule('* * */6 * *', () => {
     emailedPosts = new Set()
     console.log("[Reset Emailed Post Cache]");
 })
 
 // Start new post cron job
-cron.schedule('0-59/5 * * * *', () => {
+cron.schedule('*/5 * * * *', () => {
     runNewPostJob()
 })
 
@@ -70,15 +71,14 @@ function runNewPostJob() {
         newPostArray.forEach((post) => {
             if (!emailedPosts.has(post.id)) {
                 if(postRatingService.AnalyzePostCandidate(post)) {
-                    const emailOptions = {
-                        from: 'pogoochampooclips@gmail.com',
-                        to: 'kkroberts1635@gmail.com',
-                        subject: `${post.title}`,
-                        text: `${post.reddit_link}`
-                    }
+                    const emailOptions = new MailOptions(
+                        process.env.email_user,
+                        'kkroberts1635@gmail.com',
+                        `${post.title}`,
+                        `${post.reddit_link}`
+                    )
                     // Send email about post
                     mailerService.SendEmail(emailOptions)
-                    console.log(emailedPosts)
                     // Write that post was emailed
                     emailedPosts.add(post.id)
                 }
